@@ -871,7 +871,7 @@ USE AT YOUR OWN RISK!
 ---
 
 **Version**: 1.0.0  
-**Last Updated**: 2025-01-01  
+**Last Updated**: 2026-01-01  
 **Firmware**: ESPHome 2024.x compatible  
 **Hardware Revision**: XIAO ESP32C6 v1.0
 
