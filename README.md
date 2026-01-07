@@ -19,7 +19,7 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 | **2-Channel Relay Module** | Otronic | - | [Link](https://www.otronic.nl/nl/relais-module-5v-low-2-kanaals.html) | 1 |
 | **Passive Buzzer Module** | Otronic | - | [Link](https://www.otronic.nl/en/buzzer-module-passive-for-arduino.html) | 1 |
 | **Motorized Ball Valve** | Tameson | BW2-012-AW1-230AC | [Link](https://tameson.nl/products/bw2-012-aw1-230ac-elektrische-kogelkraan-1-2inch-2-weg-230vac-3-punt) | 1 |
-| **Messing 2-weg Gemotoriseerde Kogelkraan** | HOENYZY | - | [Link](https://nl.aliexpress.com/item/1005005649944295.html?spm=a2g0o.order_list.order_list_main.20.450c79d2xbuLWs&gatewayAdapt=glo2nld) | 1 |
+| **Brass 2-Way Motorized Ball Valve** | HOENYZY | - | [Link](https://nl.aliexpress.com/item/1005005649944295.html?spm=a2g0o.order_list.order_list_main.20.450c79d2xbuLWs&gatewayAdapt=glo2nld) | 1 |
 
 ### Estimated Total Cost
 - **Electronics**: ~€50-70
