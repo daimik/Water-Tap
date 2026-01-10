@@ -12,6 +12,7 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 |-----------|----------|-------------|------|-----|
 | **XIAO ESP32C6** | Kiwi Electronics | 20076 | [Link](https://www.kiwi-electronics.com/nl/seeed-studio-xiao-esp32c6-20076) | 1 |
 | **2.4GHz WiFi Antenna** | Kiwi Electronics | 11062 | [Link](https://www.kiwi-electronics.com/nl/2-4ghz-mini-flexibele-wifi-antenne-met-ufl-connector-11062) | 1 |
+| **100µF 16V Capacitor** | Kiwi Electronics | 440 | [Link](https://www.kiwi-electronics.com/nl/100uf-16v-condensator-440?search=100uF%2016V%20condensator&_gl=1*tq4rti*_up*MQ..*_gs*MQ..&gclid=CjwKCAiAjojLBhAlEiwAcjhrDvM0Gku74yJA9ZiQpyTyqXx9-5CV6K94nHE5wVZ7vDdJzaB1a3WVLBoC7CYQAvD_BwE&gbraid=0AAAAADuMvud3WF6krQIDaCJCy4Kn0qvrI) | 2 |
 | **HLK-PM03 Power Module** | Otronic | - | [Link](https://www.otronic.nl/nl/220vac-naar-33vdc-1a-converter-module-hlk-pm03.html) | 1 |
 | **Green LED Button 12mm** | Otronic | - | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-groen-rvs-12mm.html) | 1 |
 | **Red LED Button 12mm** | Otronic | - | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-rood-rvs-12mm.html) | 1 |
@@ -85,13 +86,13 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
   - Compact switching power supply module
 
 #### Control Buttons (with integrated LEDs)
-- **Red Push Button** - 12mm Stainless Steel Momentary with 5V LED
-  - [Otronic - Red LED Button](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-rood-rvs-12mm.html)
-  - Function: Close Water / Status indicator
-  
 - **Green Push Button** - 12mm Stainless Steel Momentary with 5V LED
   - [Otronic - Green LED Button](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-groen-rvs-12mm.html)
   - Function: Open Water / Status indicator
+  
+- **Red Push Button** - 12mm Stainless Steel Momentary with 5V LED
+  - [Otronic - Red LED Button](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-rood-rvs-12mm.html)
+  - Function: Close Water / Status indicator
   
 - **Blue Push Button** - 12mm Stainless Steel Momentary with 5V LED
   - [Otronic - Blue LED Button](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-blauw-rvs-12mm.html)
@@ -104,6 +105,12 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
   - Channels: 2 independent relays
   - Contact Rating: 10A @ 250V AC / 30V DC
   - Optocoupler isolated
+
+#### Capacitors for Relay GPIO Stabilization
+- **100µF 16V Electrolytic Capacitor** (Qty: 2)
+  - [Kiwi Electronics - 100µF 16V Capacitor](https://www.kiwi-electronics.com/nl/100uf-16v-condensator-440?search=100uF%2016V%20condensator&_gl=1*tq4rti*_up*MQ..*_gs*MQ..&gclid=CjwKCAiAjojLBhAlEiwAcjhrDvM0Gku74yJA9ZiQpyTyqXx9-5CV6K94nHE5wVZ7vDdJzaB1a3WVLBoC7CYQAvD_BwE&gbraid=0AAAAADuMvud3WF6krQIDaCJCy4Kn0qvrI)
+  - Function: Stabilizes GPIO signals to relay inputs
+  - Required: One capacitor per relay input
 
 #### Audio Feedback
 - **Passive Buzzer Module** - Arduino compatible
@@ -167,26 +174,47 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 
 ### GPIO Pin Mapping
 
+#### XIAO ESP32C6 Pinout Reference
+For complete pinout documentation, see: [XIAO ESP32C6 Getting Started Guide](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/)
+
+| Pin Label | GPIO |
+|-----------|------|
+| D0 | GPIO0 |
+| D1 | GPIO1 |
+| D2 | GPIO2 |
+| D3 | GPIO21 |
+| D4 | GPIO22 |
+| D5 | GPIO23 |
+| D6 | GPIO16 |
+| D7 | GPIO17 |
+| D8 | GPIO19 |
+| D9 | GPIO20 |
+| D10 | GPIO18 |
+
+#### Pin Assignments
+
 | Pin Label | GPIO | Function | Type | Component |
 |-----------|------|----------|------|-----------|
-| D0 | GPIO15 | Open Button | Input (Pull-up) | Physical push button |
-| D1 | GPIO16 | Close Button | Input (Pull-up) | Physical push button |
-| D2 | GPIO17 | Green LED | Output | Status indicator |
-| D3 | GPIO18 | Red LED | Output | Status indicator |
-| D4 | GPIO19 | Blue WiFi LED | Output | WiFi status indicator |
-| D5 | GPIO20 | Open Relay | Output | Valve open control |
-| D6 | GPIO21 | Close Relay | Output | Valve close control |
-| D8 | GPIO23 | Reboot Button | Input (Pull-up) | Physical push button |
-| D9 | GPIO8 | Passive Buzzer | PWM Output | Audio feedback |
+| D0 | GPIO0 | Open Button | Input (Pull-up) | Physical push button |
+| D1 | GPIO1 | Close Button | Input (Pull-up) | Physical push button |
+| D2 | GPIO2 | Green LED | Output | Status indicator |
+| D3 | GPIO21 | Red LED | Output | Status indicator |
+| D4 | GPIO22 | Blue WiFi LED | Output | WiFi status indicator |
+| D5 | GPIO23 | Open Relay | Output | Valve open control |
+| D6 | GPIO16 | Close Relay | Output | Valve close control |
+| D7 | GPIO17 | Passive Buzzer | PWM Output (LEDC) | Audio feedback |
+| D8 | GPIO19 | Reboot Button | Input (Pull-up) | Physical push button |
+| D9 | GPIO20 | *Available* | - | Free for expansion |
+| D10 | GPIO18 | *Available* | - | Free for expansion |
 | - | GPIO3 | RF Switch Control | Reserved | Antenna control |
 | - | GPIO14 | Antenna Select | Reserved | External antenna |
 
 ### Available Pins
-- **D10 (GPIO9)** - Free for expansion
-- **GPIO0** - Free (Boot button, use with caution)
+- **D9 (GPIO20)** - Free for expansion
+- **D10 (GPIO18)** - Free for expansion
 
 ### Total Pin Usage
-- **8 GPIO pins** - Active functions
+- **9 GPIO pins** - Active functions
 - **2 GPIO pins** - Antenna control (reserved)
 - **2 GPIO pins** - Available for expansion
 
@@ -198,14 +226,14 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 
 | Button | Location | Action | Response |
 |--------|----------|--------|----------|
-| **Open** | D0 (GPIO15) | Starts valve opening sequence | Rising bubble sound + Green LED pulse |
-| **Close** | D1 (GPIO16) | Starts valve closing sequence | Descending flow sound + Red LED pulse |
-| **Reboot** | D8 (GPIO23) | Restarts the device | System reboot |
+| **Open** | D0 (GPIO0) | Starts valve opening sequence | Rising bubble sound + Green LED pulse |
+| **Close** | D1 (GPIO1) | Starts valve closing sequence | Descending flow sound + Red LED pulse |
+| **Reboot** | D8 (GPIO19) | Restarts the device | System reboot |
 
 ### Button Behavior
 - **Debounce**: 50ms delay filter
 - **Pull-up**: Internal pull-up resistors enabled
-- **Active**: Low (button press = GND connection)
+- **Active**: Low (button press = GND connection, inverted in code)
 - **Safety**: Lockout period enforced between operations
 
 ---
@@ -214,21 +242,21 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 
 ### LED Status Guide
 
-#### 🟢 Green LED (D2 - GPIO17)
+#### 🟢 Green LED (D2 - GPIO2)
 | State | Meaning | Duration |
 |-------|---------|----------|
 | **PULSING** (500ms on/off) | Water tap opening | 25 seconds |
 | **SOLID ON** | Water tap is OPEN | Until closed |
 | **OFF** | Water tap is CLOSED | Until opened |
 
-#### 🔴 Red LED (D3 - GPIO18)
+#### 🔴 Red LED (D3 - GPIO21)
 | State | Meaning | Duration |
 |-------|---------|----------|
 | **PULSING** (500ms on/off) | Water tap closing | 25 seconds |
 | **SOLID ON** | Water tap is CLOSED | Until opened |
 | **OFF** | Water tap is OPEN | Until closed |
 
-#### 🔵 Blue WiFi LED (D4 - GPIO19)
+#### 🔵 Blue WiFi LED (D4 - GPIO22)
 | State | Meaning |
 |-------|---------|
 | **SOLID ON** | WiFi connected successfully |
@@ -242,7 +270,7 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 ## 🔊 Sound Effects
 
 ### Audio Feedback System
-**Hardware**: Passive buzzer on D9 (GPIO8) with PWM control
+**Hardware**: Passive buzzer on D7 (GPIO17) with LEDC PWM control at 2000Hz base frequency
 
 ### Sound Events
 
@@ -252,7 +280,7 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 | **Water Closing** | 🎵 Descending flow | 800Hz → 600Hz → 400Hz | Start of close operation |
 | **Operation Complete** | 🎶 Success jingle | C-E-G chord (523-659-784Hz) | After 25-second operation |
 | **Safety Lockout** | ⚠️ Warning beep | 300Hz low tone | Attempt during lockout period |
-| **Device Startup** | 🎵 Power-on chime | C-E-G-C ascending | System boot complete |
+| **Device Startup** | 🎵 Power-on chime | C-E-G-C ascending (523-659-784-1047Hz) | System boot complete |
 | **WiFi Connected** | 📶 Quick beep | 1000Hz | WiFi connection established |
 | **Error Alert** | 🚨 Triple beep | 1000Hz rapid | System error condition |
 
@@ -260,7 +288,7 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 - ✅ Can be **enabled/disabled** via web interface
 - ✅ **"Buzzer Enabled"** switch in web UI
 - ✅ **"Test Buzzer Sounds"** button for testing
-- ✅ Settings persist across reboots
+- ✅ Settings persist across reboots (restore_mode: RESTORE_DEFAULT_ON)
 
 ---
 
@@ -268,9 +296,10 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 
 ### 1. Relay Interlock System
 - **Hardware Protection**: Both relays physically cannot be active simultaneously
-- **Interlock Wait Time**: 500ms safety delay between relay switches
-- **Real-time Monitoring**: Web interface shows relay status
-- **Error Detection**: Alerts if both relays detected active (should never happen)
+- **Software Interlock**: Code prevents turning on one relay while the other is active
+- **Interlock Wait Time**: 100ms safety delay between relay switches
+- **Real-time Monitoring**: Web interface shows relay status every 250ms
+- **Emergency Shutdown**: Automatic disable if both relays detected active
 
 ### 2. 30-Second Safety Lockout
 - **Purpose**: Prevents mechanical stress on valve motor
@@ -287,7 +316,14 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
   - "YES - Safety Lockout Active"
   - "NO - Ready"
 
-### 4. State Persistence
+### 4. Boot Safety
+- **Priority 1000**: Force both relay GPIOs HIGH (OFF) immediately at boot using direct GPIO control
+- **Priority 600**: Reinforce GPIO HIGH state after component initialization
+- **Priority 200**: Explicitly turn off switch components
+- **Priority -100**: Restore LED states only (no relay interaction)
+- **Template Switches**: Using `restore_mode: ALWAYS_OFF` for relays
+
+### 5. State Persistence
 - **Flash Storage**: Water state saved every 5 minutes
 - **Reboot Recovery**: System restores last known state after power loss
 - **LED Restoration**: LEDs show correct state immediately after boot
@@ -299,8 +335,9 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 ### Access
 - **URL**: `http://[DEVICE_IP_ADDRESS]`
 - **Port**: 80 (HTTP)
+- **Version**: Web Server v3
 - **Fallback AP**: "Water-Tap Fallback Hotspot"
-  - Password: `password`
+  - Password: `9bKtsBH2XXhw`
 
 ### Interface Sections
 
@@ -322,9 +359,9 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 - **🚫 Operation Blocked**
   - YES/NO with detailed reason
 - **🛡️ Relay Interlock Status**
-  - Real-time relay state monitoring
-  - "Both Relays OFF" / "Open Relay Active" / "Close Relay Active"
-  - "ERROR - Both Active!" (safety violation alert)
+  - Real-time relay state monitoring (250ms update)
+  - "✅ Both Relays OFF (Idle)" / "⚡ Open Relay Active" / "⚡ Close Relay Active"
+  - "🔴 EMERGENCY - Both Active! (Auto-disabled)" (safety violation alert)
 - **🕐 Last Operation Time**
   - Seconds/minutes/hours/days ago
 - **🌐 IP Address**
@@ -358,13 +395,13 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
    ↓
 5. LED: 🟢 Green LED starts pulsing (500ms on/off)
    ↓
-6. Relay: ⚙️ Open relay activates
+6. Relay: ⚙️ Close relay OFF, wait 100ms, Open relay ON
    ↓
 7. Timer: ⏱️ 25-second countdown starts (25→24→23...→0)
    ↓
 8. Wait: Valve motor opens tap over 25 seconds
    ↓
-9. Relay: ⚙️ Open relay deactivates
+9. Relay: ⚙️ Open relay OFF
    ↓
 10. Audio: 🎶 Success jingle (C-E-G)
     ↓
@@ -388,13 +425,13 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
    ↓
 5. LED: 🔴 Red LED starts pulsing (500ms on/off)
    ↓
-6. Relay: ⚙️ Close relay activates
+6. Relay: ⚙️ Open relay OFF, wait 100ms, Close relay ON
    ↓
 7. Timer: ⏱️ 25-second countdown starts (25→24→23...→0)
    ↓
 8. Wait: Valve motor closes tap over 25 seconds
    ↓
-9. Relay: ⚙️ Close relay deactivates
+9. Relay: ⚙️ Close relay OFF
    ↓
 10. Audio: 🎶 Success jingle (C-E-G)
     ↓
@@ -422,8 +459,8 @@ Countdown shows remaining lockout time (e.g., "18 sec")
 #### Both Relays Active (Safety Violation)
 ```
 System detects both relays ON → 🚨 Error alert sound
-Web interface shows: "ERROR - Both Active!"
-(Should never occur due to hardware interlock)
+Web interface shows: "🔴 EMERGENCY - Both Active! (Auto-disabled)"
+Both relays automatically turned OFF
 ```
 
 ---
@@ -447,23 +484,25 @@ XIAO ESP32C6 Pinout:
 │   └── 5V → Optional USB-C for programming
 │
 ├── Button Switches (12mm Stainless Steel)
-│   ├── D0 (GPIO15) → Green button switch → GND
-│   ├── D1 (GPIO16) → Red button switch → GND
-│   └── D8 (GPIO23) → Blue button switch → GND
+│   ├── D0 (GPIO0) → Green button switch → GND
+│   ├── D1 (GPIO1) → Red button switch → GND
+│   └── D8 (GPIO19) → Blue button switch → GND
 │
-├── Button LEDs (integrated in buttons, 5V)
-│   ├── D2 (GPIO17) → Green button LED (+) → GND
-│   ├── D3 (GPIO18) → Red button LED (+) → GND
-│   └── D4 (GPIO19) → Blue button LED (+) → GND
+├── Button LEDs (integrated in buttons, accent lighting)
+│   ├── D2 (GPIO2) → Green button LED (+) → GND
+│   ├── D3 (GPIO21) → Red button LED (+) → GND
+│   └── D4 (GPIO22) → Blue button LED (+) → GND
 │
 ├── Relays (2-channel 5V LOW trigger module)
+│   │   ⚠️ IMPORTANT: Each relay input requires a 100µF capacitor
+│   │   for GPIO signal stabilization (see Relay Capacitor Wiring below)
 │   ├── 5V → Relay VCC
 │   ├── GND → Relay GND
-│   ├── D5 (GPIO20) → Open relay IN1
-│   └── D6 (GPIO21) → Close relay IN2
+│   ├── GPIO23 → 100µF capacitor → Open relay IN1
+│   └── GPIO16 → 100µF capacitor → Close relay IN2
 │
 └── Audio
-    ├── D9 (GPIO8) → Passive buzzer module (+)
+    ├── D7 (GPIO17) → Passive buzzer module (+)
     └── GND → Passive buzzer module (-)
 
 HLK-PM03 Power Module:
@@ -478,17 +517,56 @@ Note: Use separate 5V power supply (USB or buck converter)
       for relay module and button LEDs if needed.
 ```
 
-#### 2. Valve Wiring (230V AC - DANGER!)
+#### 2. Relay Capacitor Wiring
+```
+⚠️ IMPORTANT: A 100µF capacitor is required for each relay GPIO input
+              to stabilize the signal and prevent false triggering.
+
+For EACH relay input (Open Relay and Close Relay):
+
+GPIO ──┬── Relay IN
+       │
+       + 100µF 16V
+       │
+       -
+       │
+      GND
+
+Wiring Details:
+├── GPIO23 ────────┬── Open Relay IN1
+│                  │
+│                  + 100µF 16V (positive leg)
+│                  │
+│                  - (negative leg)
+│                  │
+│                 GND
+│
+└── GPIO16 ────────┬── Close Relay IN2
+                   │
+                   + 100µF 16V (positive leg)
+                   │
+                   - (negative leg)
+                   │
+                  GND
+
+Notes:
+- Use 100µF 16V electrolytic capacitors
+- Observe polarity: positive (+) leg to GPIO/Relay IN, negative (-) leg to GND
+- Capacitors filter noise and prevent relay chatter during boot/reset
+- Place capacitors as close to relay inputs as possible
+```
+
+#### 3. Valve Wiring (230V AC - DANGER!)
 ```
 ⚠️ WARNING: 230V AC CAN BE LETHAL! 
 Use qualified electrician if not experienced.
 
-Relay 1 (Open):
+Relay 1 (Open - GPIO23):
 ├── Common (COM) → 230V Live
 ├── Normally Open (NO) → Valve "Open" terminal
 └── Normally Closed (NC) → Not connected
 
-Relay 2 (Close):
+Relay 2 (Close - GPIO16):
 ├── Common (COM) → 230V Live
 ├── Normally Open (NO) → Valve "Close" terminal
 └── Normally Closed (NC) → Not connected
@@ -533,7 +611,7 @@ esphome upload water-tap.yaml
 4. Access web interface at device IP
 
 ### Antenna Configuration
-External antenna is **automatically enabled** on boot:
+External antenna is **automatically enabled** on boot (priority 800):
 - GPIO3 set LOW (activates RF switch)
 - GPIO14 set HIGH (selects external antenna)
 - No manual configuration needed
@@ -547,6 +625,8 @@ External antenna is **automatically enabled** on boot:
 | Specification | Value |
 |--------------|-------|
 | **Model** | Seeed Studio XIAO ESP32C6 |
+| **Board Config** | esp32-c6-devkitc-1 |
+| **Framework** | ESP-IDF |
 | **CPU** | Dual RISC-V (160MHz + 20MHz) |
 | **RAM** | 512KB SRAM |
 | **Flash** | 4MB |
@@ -576,9 +656,11 @@ External antenna is **automatically enabled** on boot:
 |-----------|-------|
 | **Operation Duration** | 25 seconds (fixed) |
 | **Safety Lockout** | 30 seconds between direction changes |
-| **Relay Interlock Delay** | 500ms |
+| **Relay Switch Delay** | 100ms between relay changes |
+| **Button Debounce** | 50ms |
 | **Statistics Update** | Every 10 seconds |
 | **Flash Write Interval** | Every 5 minutes |
+| **Relay Status Monitor** | Every 250ms |
 | **WiFi Range** | Up to 80m (with external antenna) |
 | **Web Server Port** | 80 (HTTP) |
 | **API Encryption** | AES (Home Assistant) |
@@ -612,16 +694,18 @@ External antenna is **automatically enabled** on boot:
 │                                         │
 │  [USB-C]                                │
 │                                         │
-│  5V  ●  D0/GPIO15 ──→ Green Button SW  │
-│  GND ●  D1/GPIO16 ──→ Red Button SW    │
-│  3V3 ●  D2/GPIO17 ──→ Green Button LED │
-│      ●  D3/GPIO18 ──→ Red Button LED   │
-│      ●  D4/GPIO19 ──→ Blue Button LED  │
-│      ●  D5/GPIO20 ──→ Open Relay IN    │
-│      ●  D6/GPIO21 ──→ Close Relay IN   │
-│      ●  D8/GPIO23 ──→ Blue Button SW   │
-│      ●  D9/GPIO8  ──→ Buzzer (+)       │
-│      ●  D10/GPIO9     (Free)           │
+│  5V  ●  D0/GPIO0  ──→ Green Button SW   │
+│  GND ●  D1/GPIO1  ──→ Red Button SW     │
+│  3V3 ●  D2/GPIO2  ──→ Green Button LED  │
+│      ●  D3/GPIO21 ──→ Red Button LED    │
+│      ●  D4/GPIO22 ──→ Blue Button LED   │
+│      ●  D7/GPIO17 ──→ Buzzer (+)        │
+│      ●  D8/GPIO19 ──→ Blue Button SW    │
+│      ●  D9/GPIO20     (Free)            │
+│      ●  GPIO23 ───┬→ Open Relay IN      │
+│      │            + 100µF to GND        │
+│      ●  GPIO16 ───┬→ Close Relay IN     │
+│      │            + 100µF to GND        │
 │                                         │
 │  [BOOT] [RESET]                         │
 └─────────────────────────────────────────┘
@@ -645,48 +729,63 @@ Power Supply:
    
           ESP32C6              Button         
              │                   │
-    GPIO15 ──┼───────────────→ SW (NO)
+     GPIO0 ──┼───────────────→ SW (NO)     [Open Button]
              │                   │
        GND ──┼───────────────→ SW COM
              │                   │
-    GPIO17 ──┼───────────────→ LED (+)
+     GPIO2 ──┼───────────────→ LED (+)
              │                   │
        GND ──┼───────────────→ LED (-)
              
    Note: Buttons have built-in LED
-   Green Button = Open Water control
-   Red Button = Close Water control  
-   Blue Button = Reboot control
+   Green Button (GPIO0/GPIO2) = Open Water control
+   Red Button (GPIO1/GPIO21) = Close Water control  
+   Blue Button (GPIO19/GPIO22) = Reboot control + WiFi status
 ```
 
 ### LED Control (Integrated in Buttons)
 ```
 The 12mm stainless steel buttons have integrated 5V LEDs:
-- Green LED in Green Button (GPIO17)
-- Red LED in Red Button (GPIO18)
-- Blue LED in Blue Button (GPIO19)
+- Green LED in Green Button (GPIO2)
+- Red LED in Red Button (GPIO21)
+- Blue LED in Blue Button (GPIO22)
 
 Each LED is controlled independently from the button switch.
 ```
 
 ### Relay Module Wiring (2-Channel LOW Trigger)
 ```
-    ESP32C6       2-Ch Relay Module       230V Valve
-       │              │                      │
-  GPIO20 ──→ IN1    VCC ────── 5V           │
-  GPIO21 ──→ IN2    GND ────── GND          │
-   5V   ──→ VCC                             │
-   GND  ──→ GND    COM1 ───────────────── L (Live)
-                   NO1  ───────────────── Valve Open
-                   COM2 ───────────────── L (Live)
-                   NO2  ───────────────── Valve Close
-                                            │
-                   Valve Common ────────── N (Neutral)
+    ESP32C6       Capacitors      2-Ch Relay Module       230V Valve
+       │              │                │                      │
+   GPIO23 ──┬─────────┼──→ IN1    VCC ────── 5V               │
+            │         │                                       │
+            + 100µF   │           GND ────── GND              │
+            │         │                                       │
+            -         │          COM1 ───────────────────── L (Live)
+            │         │           NO1 ───────────────────── Valve Open
+           GND        │                                       │
+                      │          COM2 ───────────────────── L (Live)
+   GPIO16 ──┬─────────┼──→ IN2    NO2 ───────────────────── Valve Close
+            │         │                                       │
+            + 100µF   │                                       │
+            │         │    Valve Common ────────────────── N (Neutral)
+            -         │
+            │         │
+           GND        │
 
-Note: This is a LOW trigger module
-- HIGH (5V) = Relay OFF
+Capacitor Details:
+- Type: 100µF 16V Electrolytic
+- Purpose: GPIO signal stabilization
+- Wiring: Positive (+) to GPIO/Relay IN junction
+          Negative (-) to GND
+- Required: One capacitor per relay input
+
+Note: This is a LOW trigger module (inverted logic)
+- HIGH (3.3V) = Relay OFF
 - LOW (0V) = Relay ON
 - Optocoupler isolated for safety
+- Capacitors prevent false triggering during boot/reset
+- Code uses direct GPIO control with internal pull-ups
 ```
 
 ### High Voltage Warning
@@ -716,15 +815,18 @@ wifi_password: "YourNetworkPassword"
 ### water-tap.yaml
 Complete ESPHome configuration file is provided separately.
 Key sections:
-- WiFi configuration with fallback AP
-- Antenna auto-selection on boot
-- GPIO pin definitions
+- WiFi configuration with fallback AP (password: 9bKtsBH2XXhw)
+- ESP-IDF framework for ESP32C6
+- Antenna auto-selection on boot (priority 800)
+- GPIO pin definitions with direct GPIO control for relays
+- Multi-priority boot sequence for relay safety
+- Template switches with ALWAYS_OFF restore mode
 - Relay interlocks and safety timers
-- LED control logic
-- Sound effect scripts
-- Web server interface
-- Statistics tracking
-- Home Assistant API integration
+- LED control logic with state persistence
+- LEDC PWM sound effect scripts
+- Web server interface (v3)
+- Statistics tracking with 10s update interval
+- Home Assistant API integration with encryption
 
 ---
 
@@ -734,11 +836,11 @@ Key sections:
 Device automatically appears in Home Assistant when API encryption key is configured.
 
 ### Available Entities
-- **Buttons**: Open Water, Close Water, Reset Statistics
+- **Buttons**: Open Water, Close Water, Reset Statistics, Test Buzzer Sounds
 - **Switches**: Buzzer Enabled, Restart Device
-- **Sensors**: All statistics and monitoring values
-- **Text Sensors**: Status displays
-- **Binary Sensors**: Device online status
+- **Sensors**: Operation Countdown, Safety Lockout Countdown, Total Operations, Total Opens, Total Closes, Total Runtime, WiFi Signal Strength, Device Uptime
+- **Text Sensors**: Water Status, Operation Blocked, Relay Interlock Status, Last Operation Time, IP Address
+- **Binary Sensors**: Device Online
 
 ### Example Automation
 ```yaml
@@ -769,7 +871,7 @@ automation:
 ### WiFi Won't Connect
 1. Check WiFi credentials in secrets.yaml
 2. Ensure 2.4GHz network (5GHz not supported)
-3. Connect to fallback AP: "Water-Tap Fallback Hotspot"
+3. Connect to fallback AP: "Water-Tap Fallback Hotspot" (password: 9bKtsBH2XXhw)
 4. Check blue LED status
 
 ### Valve Doesn't Operate
@@ -778,23 +880,38 @@ automation:
 3. Test relays manually (listen for click)
 4. Verify valve wiring (3-wire: Common/Open/Close)
 5. Check safety lockout countdown (must be 0)
+6. Check "Relay Interlock Status" in web interface
+
+### Relays Triggering Unexpectedly at Boot
+1. Verify 100µF capacitors are installed on each relay GPIO input (GPIO23 and GPIO16)
+2. Check capacitor polarity (positive to GPIO, negative to GND)
+3. Ensure capacitors are rated at least 16V
+4. Place capacitors as close to relay inputs as possible
+5. The code includes multi-priority boot safety - check logs for "relay_safety" messages
 
 ### LEDs Don't Light Up
 1. Check LED polarity (cathode to GND)
 2. Verify current-limiting resistors (220Ω recommended)
-3. Test GPIO outputs with multimeter
+3. Test GPIO outputs with multimeter (GPIO2, GPIO21, GPIO22)
 4. Check water state in web interface
 
 ### No Sound from Buzzer
 1. Verify buzzer is passive type (not active)
 2. Check "Buzzer Enabled" switch is ON
 3. Use "Test Buzzer Sounds" button
-4. Verify GPIO8 PWM output with oscilloscope
+4. Verify GPIO17 PWM output with oscilloscope
+5. LEDC frequency should be 2000Hz base
 
 ### Statistics Not Saving
 1. Check flash write interval (default 5 minutes)
 2. Verify device isn't rebooting frequently
 3. Allow time for automatic save cycle
+
+### Both Relays Active Error
+1. This should never happen due to software interlocks
+2. Check for hardware issues (stuck relay, wiring short)
+3. System will automatically disable both relays
+4. Check logs for "CRITICAL: Both relays active!" messages
 
 ---
 
@@ -850,8 +967,8 @@ USE AT YOUR OWN RISK!
 **Total Development Time**: ~8 hours  
 **Code Lines**: ~800 lines (YAML + embedded C++)  
 **Features Implemented**: 25+  
-**Safety Features**: 4 independent systems  
-**GPIO Pins Used**: 10 of 11 available  
+**Safety Features**: 5 independent systems (including boot safety)  
+**GPIO Pins Used**: 11 of available pins  
 **Sound Effects**: 7 unique audio patterns  
 **Statistics Tracked**: 5 metrics with persistence
 
@@ -860,20 +977,21 @@ USE AT YOUR OWN RISK!
 ## 🎯 Quick Start Guide
 
 1. **Hardware**: Connect XIAO ESP32C6 to relay module and valve
-2. **Software**: Flash ESPHome configuration via USB
-3. **Network**: Device connects to WiFi automatically
-4. **Access**: Open web interface at device IP
-5. **Test**: Use "Test Buzzer Sounds" and try manual operation
-6. **Monitor**: Check all safety features are working
-7. **Deploy**: Install in final location with proper enclosure
+2. **Capacitors**: Install 100µF capacitors on each relay GPIO input (GPIO23, GPIO16)
+3. **Software**: Flash ESPHome configuration via USB
+4. **Network**: Device connects to WiFi automatically
+5. **Access**: Open web interface at device IP
+6. **Test**: Use "Test Buzzer Sounds" and try manual operation
+7. **Monitor**: Check all safety features are working
+8. **Deploy**: Install in final location with proper enclosure
 
 **🎉 Ready to use!** Press buttons or use web interface to control water tap.
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2026-01-01  
-**Firmware**: ESPHome 2024.x compatible  
+**Version**: 1.1.0  
+**Last Updated**: 2026-01-10  
+**Firmware**: ESPHome 2024.x compatible (ESP-IDF framework)  
 **Hardware Revision**: XIAO ESP32C6 v1.0
 
 **Made with ❤️ and ⚡ by the ESPHome Community**
