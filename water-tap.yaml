@@ -2,35 +2,71 @@ esphome:
   name: water-tap
   friendly_name: Water Tap
   on_boot:
-    # Enable external antenna FIRST (highest priority before WiFi init)
+    # HIGHEST PRIORITY: Force relays OFF immediately using direct GPIO
+    - priority: 1000
+      then:
+        - lambda: |-
+            #include "driver/gpio.h"
+            // Force both relay pins HIGH for OFF (inverted logic)
+            // Do this BEFORE any ESPHome component initialization
+            gpio_reset_pin(GPIO_NUM_23);
+            gpio_set_direction(GPIO_NUM_23, GPIO_MODE_OUTPUT);
+            gpio_set_pull_mode(GPIO_NUM_23, GPIO_PULLUP_ONLY);
+            gpio_set_level(GPIO_NUM_23, 1);  // HIGH = OFF
+            
+            gpio_reset_pin(GPIO_NUM_16);
+            gpio_set_direction(GPIO_NUM_16, GPIO_MODE_OUTPUT);
+            gpio_set_pull_mode(GPIO_NUM_16, GPIO_PULLUP_ONLY);
+            gpio_set_level(GPIO_NUM_16, 1);  // HIGH = OFF
+            
+            ESP_LOGI("relay_safety", "GPIO level set: Both relays forced OFF at early boot");
+
+    # Enable external antenna
     - priority: 800
       then:
         - lambda: |-
             #include "driver/gpio.h"
-            // Activate RF switch control (GPIO3 = LOW to enable RF switch)
             gpio_reset_pin(GPIO_NUM_3);
             gpio_set_direction(GPIO_NUM_3, GPIO_MODE_OUTPUT);
-            gpio_set_level(GPIO_NUM_3, 0);  // LOW = RF switch active
+            gpio_set_level(GPIO_NUM_3, 0);
             vTaskDelay(pdMS_TO_TICKS(10));
-            // Switch to external antenna (GPIO14 = HIGH for external)
             gpio_reset_pin(GPIO_NUM_14);
             gpio_set_direction(GPIO_NUM_14, GPIO_MODE_OUTPUT);
-            gpio_set_level(GPIO_NUM_14, 1);  // HIGH = external antenna
-            ESP_LOGI("antenna", "External antenna enabled (GPIO3=LOW, GPIO14=HIGH)");
-    
-    # Restore LED states after everything is initialized
+            gpio_set_level(GPIO_NUM_14, 1);
+            ESP_LOGI("antenna", "External antenna enabled");
+
+    # AFTER switch components initialize: Force them OFF again
+    - priority: 600
+      then:
+        - lambda: |-
+            // Ensure GPIO pins are still HIGH (OFF) after switch init
+            #include "driver/gpio.h"
+            gpio_set_level(GPIO_NUM_23, 1);  // HIGH = OFF
+            gpio_set_level(GPIO_NUM_16, 1);  // HIGH = OFF
+            ESP_LOGI("relay_safety", "GPIO reinforced after component init");
+
+    # Explicitly turn off switches after they're fully initialized
+    - priority: 200
+      then:
+        - switch.turn_off: relay_open_switch
+        - switch.turn_off: relay_close_switch
+        - delay: 50ms
+        - lambda: |-
+            ESP_LOGI("relay_safety", "Switches explicitly turned OFF");
+
+    # Restore LED states ONLY - NO relay interaction
     - priority: -100
       then:
-        - if:
-            condition:
-              lambda: 'return id(water_state);'
-            then:
-              - output.turn_on: green_led_output
-              - output.turn_off: red_led_output
-            else:
-              - output.turn_off: green_led_output
-              - output.turn_on: red_led_output
-        # Play startup sound
+        - lambda: |-
+            // Restore LEDs based on water_state WITHOUT touching relays
+            if (id(water_state)) {
+              id(green_led_output).turn_on();
+              id(red_led_output).turn_off();
+            } else {
+              id(green_led_output).turn_off();
+              id(red_led_output).turn_on();
+            }
+        - delay: 500ms
         - script.execute: sound_startup
 
 esp32:
@@ -135,10 +171,10 @@ globals:
     initial_value: '0'
 
 binary_sensor:
-  # Physical buttons (12mm stainless steel with integrated LEDs)
+  # Physical buttons
   - platform: gpio
     pin:
-      number: GPIO15  # D0 - Green button
+      number: GPIO0  # D0
       mode:
         input: true
         pullup: true
@@ -160,7 +196,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO16  # D1 - Red button
+      number: GPIO1  # D1
       mode:
         input: true
         pullup: true
@@ -180,10 +216,10 @@ binary_sensor:
           id(last_button_type) = 2;
           id(close_water_tap).execute();
 
-  # Physical reboot button - D8 (GPIO23) - Blue button
+  # Physical reboot button - D8 (GPIO19)
   - platform: gpio
     pin:
-      number: GPIO23  # D8
+      number: GPIO19  # D8
       mode:
         input: true
         pullup: true
@@ -210,22 +246,21 @@ binary_sensor:
     internal: true
 
 output:
-  # LED outputs for 12mm stainless steel buttons (integrated 5V LEDs)
   - platform: gpio
-    pin: GPIO17  # D2 - Green button LED
+    pin: GPIO2  # D2 - Green LED
     id: green_led_output
 
   - platform: gpio
-    pin: GPIO18  # D3 - Red button LED
+    pin: GPIO21  # D3 - Red LED
     id: red_led_output
   
   - platform: gpio
-    pin: GPIO19  # D4 - Blue button LED
+    pin: GPIO22  # D4 - Blue LED (WiFi status)
     id: blue_led_output
 
-  # Passive buzzer on D9 (GPIO8) with PWM
+  # Passive buzzer on D9 (GPIO20) with PWM
   - platform: ledc
-    pin: GPIO8  # D9
+    pin: GPIO20  # D9
     id: buzzer_output
     frequency: 2000Hz
 
@@ -261,6 +296,16 @@ interval:
             } else {
               id(safety_lockout_remaining) = 0;
             }
+          }
+      
+      # SAFETY: Monitor relay states and force both OFF if conflict detected
+      - lambda: |-
+          if (id(relay_open_switch).state && id(relay_close_switch).state) {
+            ESP_LOGE("relay_safety", "CRITICAL: Both relays active! Emergency shutdown!");
+            id(relay_open_switch).turn_off();
+            id(relay_close_switch).turn_off();
+            id(operation_in_progress) = false;
+            id(sound_error).execute();
           }
 
 # ========== SOUND EFFECTS ==========
@@ -437,7 +482,7 @@ script:
             - delay: 200ms
             - output.turn_off: buzzer_output
 
-  # Main water tap operations
+  # Main water tap operations - RELAYS ONLY ON DURING 25s OPERATION
   - id: open_water_tap
     mode: single
     then:
@@ -445,12 +490,12 @@ script:
           if (id(operation_in_progress)) return;
           id(operation_in_progress) = true;
           id(operation_remaining_seconds) = 25;
-      - script.execute: sound_water_open  # Play opening sound
+      - script.execute: sound_water_open
       - output.turn_off: red_led_output
       - switch.turn_off: relay_close_switch
       - delay: 100ms
       - switch.turn_on: relay_open_switch
-      # Pulse green LED during 25s operation with countdown
+      # Pulse green LED during 25s operation
       - repeat:
           count: 25
           then:
@@ -472,7 +517,7 @@ script:
       # Solid green LED when complete
       - output.turn_on: green_led_output
       - output.turn_off: red_led_output
-      - script.execute: sound_operation_complete  # Play success sound
+      - script.execute: sound_operation_complete
       - globals.set:
           id: operation_in_progress
           value: 'false'
@@ -484,12 +529,12 @@ script:
           if (id(operation_in_progress)) return;
           id(operation_in_progress) = true;
           id(operation_remaining_seconds) = 25;
-      - script.execute: sound_water_close  # Play closing sound
+      - script.execute: sound_water_close
       - output.turn_off: green_led_output
       - switch.turn_off: relay_open_switch
       - delay: 100ms
       - switch.turn_on: relay_close_switch
-      # Pulse red LED during 25s operation with countdown
+      # Pulse red LED during 25s operation
       - repeat:
           count: 25
           then:
@@ -511,30 +556,59 @@ script:
       # Solid red LED when complete
       - output.turn_off: green_led_output
       - output.turn_on: red_led_output
-      - script.execute: sound_operation_complete  # Play success sound
+      - script.execute: sound_operation_complete
       - globals.set:
           id: operation_in_progress
           value: 'false'
 
 switch:
-  # Relays - 2-channel 5V LOW trigger module
-  - platform: gpio
-    pin: GPIO20  # D5
+  # RELAY SWITCHES - Using template switches for better boot control
+  # The underlying GPIO is controlled manually to ensure safe boot behavior
+  - platform: template
     id: relay_open_switch
     name: "Open Relay"
-    restore_mode: ALWAYS_OFF
     internal: true
-    interlock: &relay_interlock [relay_open_switch, relay_close_switch]
-    interlock_wait_time: 500ms
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
+      - if:
+          condition:
+            switch.is_on: relay_close_switch
+          then:
+            - logger.log: "Cannot turn on Open relay - Close relay is active"
+          else:
+            - lambda: |-
+                #include "driver/gpio.h"
+                gpio_set_level(GPIO_NUM_23, 0);  // LOW = ON (inverted)
+                ESP_LOGI("relay", "Open relay ON");
+    turn_off_action:
+      - lambda: |-
+          #include "driver/gpio.h"
+          gpio_set_level(GPIO_NUM_23, 1);  // HIGH = OFF (inverted)
+          ESP_LOGI("relay", "Open relay OFF");
 
-  - platform: gpio
-    pin: GPIO21  # D6
+  - platform: template
     id: relay_close_switch
     name: "Close Relay"
-    restore_mode: ALWAYS_OFF
     internal: true
-    interlock: *relay_interlock
-    interlock_wait_time: 500ms
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
+      - if:
+          condition:
+            switch.is_on: relay_open_switch
+          then:
+            - logger.log: "Cannot turn on Close relay - Open relay is active"
+          else:
+            - lambda: |-
+                #include "driver/gpio.h"
+                gpio_set_level(GPIO_NUM_16, 0);  // LOW = ON (inverted)
+                ESP_LOGI("relay", "Close relay ON");
+    turn_off_action:
+      - lambda: |-
+          #include "driver/gpio.h"
+          gpio_set_level(GPIO_NUM_16, 1);  // HIGH = OFF (inverted)
+          ESP_LOGI("relay", "Close relay OFF");
 
   # System control
   - platform: restart
@@ -663,15 +737,18 @@ text_sensor:
     icon: "mdi:shield-lock"
     lambda: |-
       if (id(relay_open_switch).state && id(relay_close_switch).state) {
-        return {"ERROR - Both Active!"};
+        ESP_LOGE("relay_safety", "BOTH RELAYS ACTIVE - EMERGENCY!");
+        id(relay_open_switch).turn_off();
+        id(relay_close_switch).turn_off();
+        return {"🔴 EMERGENCY - Both Active! (Auto-disabled)"};
       } else if (id(relay_open_switch).state) {
-        return {"Open Relay Active"};
+        return {"⚡ Open Relay Active"};
       } else if (id(relay_close_switch).state) {
-        return {"Close Relay Active"};
+        return {"⚡ Close Relay Active"};
       } else {
-        return {"Both Relays OFF"};
+        return {"✅ Both Relays OFF (Idle)"};
       }
-    update_interval: 500ms
+    update_interval: 250ms
 
   - platform: template
     name: "Last Operation Time"
