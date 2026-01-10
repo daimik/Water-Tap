@@ -8,24 +8,42 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 
 ### Complete Bill of Materials
 
-| Component | Supplier | Part Number | Link | Qty |
-|-----------|----------|-------------|------|-----|
-| **XIAO ESP32C6** | Kiwi Electronics | 20076 | [Link](https://www.kiwi-electronics.com/nl/seeed-studio-xiao-esp32c6-20076) | 1 |
-| **2.4GHz WiFi Antenna** | Kiwi Electronics | 11062 | [Link](https://www.kiwi-electronics.com/nl/2-4ghz-mini-flexibele-wifi-antenne-met-ufl-connector-11062) | 1 |
-| **100µF 16V Capacitor** | Kiwi Electronics | 440 | [Link](https://www.kiwi-electronics.com/nl/100uf-16v-condensator-440?search=100uF%2016V%20condensator&_gl=1*tq4rti*_up*MQ..*_gs*MQ..&gclid=CjwKCAiAjojLBhAlEiwAcjhrDvM0Gku74yJA9ZiQpyTyqXx9-5CV6K94nHE5wVZ7vDdJzaB1a3WVLBoC7CYQAvD_BwE&gbraid=0AAAAADuMvud3WF6krQIDaCJCy4Kn0qvrI) | 2 |
-| **HLK-PM03 Power Module** | Otronic | - | [Link](https://www.otronic.nl/nl/220vac-naar-33vdc-1a-converter-module-hlk-pm03.html) | 1 |
-| **Green LED Button 12mm** | Otronic | - | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-groen-rvs-12mm.html) | 1 |
-| **Red LED Button 12mm** | Otronic | - | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-rood-rvs-12mm.html) | 1 |
-| **Blue LED Button 12mm** | Otronic | - | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-blauw-rvs-12mm.html) | 1 |
-| **2-Channel Relay Module** | Otronic | - | [Link](https://www.otronic.nl/nl/relais-module-5v-low-2-kanaals.html) | 1 |
-| **Passive Buzzer Module** | Otronic | - | [Link](https://www.otronic.nl/en/buzzer-module-passive-for-arduino.html) | 1 |
-| **Motorized Ball Valve** | Tameson | BW2-012-AW1-230AC | [Link](https://tameson.nl/products/bw2-012-aw1-230ac-elektrische-kogelkraan-1-2inch-2-weg-230vac-3-punt) | 1 |
-| **Brass 2-Way Motorized Ball Valve** | HOENYZY | - | [Link](https://nl.aliexpress.com/item/1005005649944295.html?spm=a2g0o.order_list.order_list_main.20.450c79d2xbuLWs&gatewayAdapt=glo2nld) | 1 |
+| Component | Supplier | Price | Link | Qty |
+|-----------|----------|-------|------|-----|
+| **XIAO ESP32C6** | Kiwi Electronics | €5,92 | [Link](https://www.kiwi-electronics.com/nl/seeed-studio-xiao-esp32c6-20076) | 1 |
+| **2.4GHz WiFi Antenna** | Kiwi Electronics | €2,72 | [Link](https://www.kiwi-electronics.com/nl/2-4ghz-mini-flexibele-wifi-antenne-met-ufl-connector-11062) | 1 |
+| **100µF 16V Capacitor** | Kiwi Electronics | €0,55 | [Link](https://www.kiwi-electronics.com/nl/100uf-16v-condensator-440) | 2 |
+| **HLK-PM03 Power Module** | Otronic | €5,05 | [Link](https://www.otronic.nl/nl/220vac-naar-33vdc-1a-converter-module-hlk-pm03.html) | 1 |
+| **Green LED Button 12mm** | Otronic | €3,49 | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-groen-rvs-12mm.html) | 1 |
+| **Red LED Button 12mm** | Otronic | €3,49 | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-rood-rvs-12mm.html) | 1 |
+| **Blue LED Button 12mm** | Otronic | €3,49 | [Link](https://www.otronic.nl/nl/drukknop-moment-puls-5v-led-blauw-rvs-12mm.html) | 1 |
+| **2-Channel Relay Module** | Otronic | €2,15 | [Link](https://www.otronic.nl/nl/relais-module-5v-low-2-kanaals.html) | 1 |
+| **Passive Buzzer Module** | Otronic | €1,50 | [Link](https://www.otronic.nl/en/buzzer-module-passive-for-arduino.html) | 1 |
+
+#### Valve Options (choose one):
+
+| Option | Supplier | Price | Link | Notes |
+|--------|----------|-------|------|-------|
+| **Option A: Brass Motorized Ball Valve** | AliExpress (HOENYZY) | ~€15-20 | [Link](https://nl.aliexpress.com/item/1005005649944295.html) | Budget option, 230V AC, 3-point control |
+| **Option B: JP Fluid Control Valve** | Tameson | ~€50-60 | [Link](https://tameson.nl/products/bw2-012-aw1-230ac-elektrische-kogelkraan-1-2inch-2-weg-230vac-3-punt) | Professional grade, BW2-012-AW1-230AC |
 
 ### Estimated Total Cost
-- **Electronics**: ~€50-70
-- **Valve**: ~€40-60
-- **Total**: ~€90-130 (excluding enclosure and wiring)
+
+**With AliExpress Valve (Option A):**
+| Category | Cost |
+|----------|------|
+| Electronics (Kiwi + Otronic) | ~€28 |
+| Valve (AliExpress) | ~€15-20 |
+| **Total** | **~€43-48** |
+
+**With Tameson Valve (Option B):**
+| Category | Cost |
+|----------|------|
+| Electronics (Kiwi + Otronic) | ~€28 |
+| Valve (Tameson) | ~€50-60 |
+| **Total** | **~€78-88** |
+
+*Prices exclude shipping and enclosure materials*
 
 ### Additional Materials Needed
 - Enclosure (IP65 rated recommended)
@@ -66,7 +84,17 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 - **Purchase**: [Kiwi Electronics - XIAO ESP32C6](https://www.kiwi-electronics.com/nl/seeed-studio-xiao-esp32c6-20076)
 - **Documentation**: [XIAO ESP32C6 Getting Started Guide](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/)
 
-### Motorized Ball Valve
+### Motorized Ball Valve (Choose One Option)
+
+#### Option A: Budget - AliExpress Brass Valve (~€15-20)
+**HOENYZY Brass 2-Way Motorized Ball Valve**
+- **Size**: 1/2 inch (DN15)
+- **Voltage**: 230V AC
+- **Control**: 3-point control (Open/Close/Stop)
+- **Operation Time**: ~25 seconds
+- **Product Link**: [AliExpress - HOENYZY Valve](https://nl.aliexpress.com/item/1005005649944295.html)
+
+#### Option B: Professional - Tameson Valve (~€50-60)
 **JP Fluid Control BW2 1/2" 2-Way 230V AC 3-Point**
 - **Model**: BW2-012-AW1-230AC
 - **Type**: Electric ball valve
@@ -108,7 +136,7 @@ Automated water tap control system with ESPHome, featuring safety interlocks, st
 
 #### Capacitors for Relay GPIO Stabilization
 - **100µF 16V Electrolytic Capacitor** (Qty: 2)
-  - [Kiwi Electronics - 100µF 16V Capacitor](https://www.kiwi-electronics.com/nl/100uf-16v-condensator-440?search=100uF%2016V%20condensator&_gl=1*tq4rti*_up*MQ..*_gs*MQ..&gclid=CjwKCAiAjojLBhAlEiwAcjhrDvM0Gku74yJA9ZiQpyTyqXx9-5CV6K94nHE5wVZ7vDdJzaB1a3WVLBoC7CYQAvD_BwE&gbraid=0AAAAADuMvud3WF6krQIDaCJCy4Kn0qvrI)
+  - [Kiwi Electronics - 100µF 16V Capacitor](https://www.kiwi-electronics.com/nl/100uf-16v-condensator-440)
   - Function: Stabilizes GPIO signals to relay inputs
   - Required: One capacitor per relay input
 
